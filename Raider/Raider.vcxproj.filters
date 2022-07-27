@@ -59,15 +59,9 @@
       <Filter>UE4</Filter>
     </ClInclude>
     <ClInclude Include="game.h" />
-    <ClInclude Include="replication.h">
-      <Filter>UE4</Filter>
-    </ClInclude>
     <ClInclude Include="native.h" />
     <ClInclude Include="ufunctionhooks.h" />
     <ClInclude Include="gui.h" />
-    <ClInclude Include="wipreplication.h">
-      <Filter>UE4</Filter>
-    </ClInclude>
     <ClInclude Include="Globals.h">
       <Filter>UE4</Filter>
     </ClInclude>

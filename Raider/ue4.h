@@ -38,55 +38,28 @@ inline AAthena_PlayerController_C* GetPlayerController(int32 Index = 0)
     return (AAthena_PlayerController_C*)GetWorld()->OwningGameInstance->LocalPlayers[Index]->PlayerController;
 }
 
-struct FNetworkObjectInfo
-{
-    AActor* Actor;
-
-    TWeakObjectPtr<AActor> WeakActor;
-
-    double NextUpdateTime;
-
-    double LastNetReplicateTime;
-
-    float OptimalNetUpdateDelta;
-
-    float LastNetUpdateTime;
-
-    uint32 bPendingNetUpdate : 1;
-
-    uint32 bForceRelevantNextUpdate : 1;
-
-    TSet<TWeakObjectPtr<UNetConnection>> DormantConnections;
-
-    TSet<TWeakObjectPtr<UNetConnection>> RecentlyDormantConnections;
-
-    bool operator==(const FNetworkObjectInfo& Other)
-    {
-        return Actor == Other.Actor;
-    }
-};
-
-class FNetworkObjectList
+struct FObjectKey
 {
 public:
-    using FNetworkObjectSet = TSet<TSharedPtr<FNetworkObjectInfo>>;
+    UObject* ResolveObjectPtr() const
+    {
+        FWeakObjectPtr WeakPtr;
+        WeakPtr.ObjectIndex = ObjectIndex;
+        WeakPtr.ObjectSerialNumber = ObjectSerialNumber;
 
-    FNetworkObjectSet AllNetworkObjects;
-    FNetworkObjectSet ActiveNetworkObjects;
-    FNetworkObjectSet ObjectsDormantOnAllConnections;
+        return WeakPtr.Get();
+    }
 
-    TMap<TWeakObjectPtr<UObject>, int32> NumDormantObjectsPerConnection;
+     int32 ObjectIndex;
+     int32 ObjectSerialNumber;
+
 };
 
-FORCEINLINE int32& GetReplicationFrame(UNetDriver* Driver)
+FORCEINLINE auto& GetClassRepNodePolicies(UObject* ReplicationDriver)
 {
-    return *(int32*)(int64(Driver) + 816); // Offsets::Net::ReplicationFrame);
+    return *reinterpret_cast<TMap<FObjectKey, EClassRepNodeMapping>*>(__int64(ReplicationDriver) + 0x3B8);
 }
 
-FORCEINLINE auto& GetNetworkObjectList(UObject* NetDriver)
-{
-    return *(*(TSharedPtr<FNetworkObjectList>*)(int64(NetDriver) + 0x508));
-}
 
 FORCEINLINE UGameplayStatics* GetGameplayStatics()
 {
@@ -1658,11 +1631,11 @@ static bool RemoveBuildingAmount(UClass* BuildingClass, AFortPlayerControllerAth
 
     for (int i = 0; i < Inventory->Inventory.ReplicatedEntries.Num(); i++)
     {
-        if (Inventory->Inventory.ReplicatedEntries[i].ItemDefinition->GetName().contains("ItemData"))
+        if (Inventory->Inventory.ReplicatedEntries[i].ItemDefinition->GetName().find("ItemData"))
         {
             int NewCount = Inventory->Inventory.ReplicatedEntries[i].Count - 5 + Inventory->Inventory.ItemInstances[i]->ItemEntry.Count - 5;
 
-            if (BuildingClass->GetName().contains("W1") && Inventory->Inventory.ReplicatedEntries[i].ItemDefinition->GetName().contains("Wood"))
+            if (BuildingClass->GetName().find("W1") && Inventory->Inventory.ReplicatedEntries[i].ItemDefinition->GetName().find("Wood"))
             {
                 if (NewCount > 0)
                 {
@@ -1671,7 +1644,7 @@ static bool RemoveBuildingAmount(UClass* BuildingClass, AFortPlayerControllerAth
 
                     for (int j = 0; j < Inventory->Inventory.ItemInstances.Num(); j++)
                     {
-                        if (Inventory->Inventory.ItemInstances[j]->GetName().contains("Wood"))
+                        if (Inventory->Inventory.ItemInstances[j]->GetName().find("Wood"))
                         {
                             Inventory->Inventory.ItemInstances[j]->ItemEntry.Count -= 5;
                             Inventory->Inventory.ItemInstances[j]->ItemEntry.ReplicationKey++;
@@ -1689,7 +1662,7 @@ static bool RemoveBuildingAmount(UClass* BuildingClass, AFortPlayerControllerAth
 
                 
             }
-            if (BuildingClass->GetName().contains("S1") && Inventory->Inventory.ReplicatedEntries[i].ItemDefinition->GetName().contains("Stone"))
+            if (BuildingClass->GetName().find("S1") && Inventory->Inventory.ReplicatedEntries[i].ItemDefinition->GetName().find("Stone"))
             {
                 if (NewCount > 0)
                 {
@@ -1698,7 +1671,7 @@ static bool RemoveBuildingAmount(UClass* BuildingClass, AFortPlayerControllerAth
 
                     for (int j = 0; j < Inventory->Inventory.ItemInstances.Num(); j++)
                     {
-                        if (Inventory->Inventory.ItemInstances[j]->GetName().contains("Stone"))
+                        if (Inventory->Inventory.ItemInstances[j]->GetName().find("Stone"))
                         {
                             Inventory->Inventory.ItemInstances[j]->ItemEntry.Count -= 5;
                             Inventory->Inventory.ItemInstances[j]->ItemEntry.ReplicationKey++;
@@ -1714,7 +1687,7 @@ static bool RemoveBuildingAmount(UClass* BuildingClass, AFortPlayerControllerAth
 
                 
             }
-            if (BuildingClass->GetName().contains("M1") && Inventory->Inventory.ReplicatedEntries[i].ItemDefinition->GetName().contains("Metal"))
+            if (BuildingClass->GetName().find("M1") && Inventory->Inventory.ReplicatedEntries[i].ItemDefinition->GetName().find("Metal"))
             {
                 if (NewCount > 0)
                 {
@@ -1724,7 +1697,7 @@ static bool RemoveBuildingAmount(UClass* BuildingClass, AFortPlayerControllerAth
 
                     for (int j = 0; j < Inventory->Inventory.ItemInstances.Num(); j++)
                     {
-                        if (Inventory->Inventory.ItemInstances[j]->GetName().contains("Metal"))
+                        if (Inventory->Inventory.ItemInstances[j]->GetName().find("Metal"))
                         {
                             Inventory->Inventory.ItemInstances[j]->ItemEntry.Count -= 5;
                             Inventory->Inventory.ItemInstances[j]->ItemEntry.ReplicationKey++;

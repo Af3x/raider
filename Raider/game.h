@@ -41,6 +41,7 @@ namespace Game
 
         GameMode->bDisableGCOnServerDuringMatch = true;
         GameMode->bAllowSpectateAfterDeath = true;
+        GameMode->bEnableReplicationGraph = true;
 
         GameMode->MatchState = InProgress;
         GameMode->K2_OnSetMatchState(InProgress);
@@ -82,9 +83,5 @@ namespace Game
         GameMode->StartMatch();
         GameMode->bAlwaysDBNO = Globals::bDBNO;
         GameMode->MinRespawnDelay = 5.0f;
-
-		// https://github.com/EpicGames/UnrealEngine/blob/46544fa5e0aa9e6740c19b44b0628b72e7bbd5ce/Engine/Source/Runtime/Engine/Private/ActorReplication.cpp#L300
-        // By default the NetCullDistanceSquared is very low, I don't know why.
-        GetWorld()->NetworkManager->NetCullDistanceSquared *= 3;// 2.5;
     }
 }

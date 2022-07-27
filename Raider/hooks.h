@@ -46,7 +46,7 @@ namespace Hooks
         {
             auto AmmoDef = a1->WeaponData->GetAmmoWorldItemDefinition_BP();
 
-            if (!AmmoDef || a1->WeaponData->GetName().contains("TID"))
+            if (!AmmoDef || a1->WeaponData->GetName().find("TID"))
                 AmmoDef = a1->WeaponData;
 
             auto Inventory = PlayerController->WorldInventory;
@@ -92,7 +92,11 @@ namespace Hooks
 
         if (NetDriver->IsA(UIpNetDriver::StaticClass()) && NetDriver->ClientConnections.Num() > 0 && NetDriver->ClientConnections[0]->InternalAck == false)
         {
-            Replication::ServerReplicateActors(NetDriver);
+            // Replication::ServerReplicateActors(NetDriver);
+            if (NetDriver->ReplicationDriver)
+            {
+                Native::ReplicationDriver::ServerReplicateActors(NetDriver->ReplicationDriver);
+            }
         }
 
         Native::NetDriver::TickFlush(NetDriver, DeltaSeconds);
@@ -410,7 +414,7 @@ namespace Hooks
 
             auto ReceivingActor = CurrentParams->ReceivingActor;
 
-            if (ReceivingActor && ReceivingActor->Class->GetName().contains("Tiered_Short_Ammo"))
+            if (ReceivingActor && ReceivingActor->Class->GetName().find("Tiered_Short_Ammo"))
             {
                 auto Ammo = (ABuildingContainer*)ReceivingActor;
                 Ammo->bAlreadySearched = true;
@@ -438,7 +442,7 @@ namespace Hooks
               
             } */
 
-            if (ReceivingActor && ReceivingActor->Class->GetName().contains("Tiered_Chest"))
+            if (ReceivingActor && ReceivingActor->Class->GetName().find("Tiered_Chest"))
             {
                 auto Chest = (ABuildingContainer*)ReceivingActor;
                 std::cout << "auto Chest = (ABuildingContainer*)ReceivingActor" << std::endl;
@@ -493,7 +497,7 @@ namespace Hooks
                    SpawnPickup(Location, Utils::GetRandomTrap(), 3);
             }
 
-            if (ReceivingActor && ReceivingActor->Class->GetName().contains("AthenaSupplyDrop")) // AllyJ - WIP Supply Drop Loot
+            if (ReceivingActor && ReceivingActor->Class->GetName().find("AthenaSupplyDrop")) // AllyJ - WIP Supply Drop Loot
             {
                 auto AthenaSupplyDrop = (ABuildingContainer*)ReceivingActor;
                 auto Location = ReceivingActor->K2_GetActorLocation();
